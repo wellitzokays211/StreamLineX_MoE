@@ -3,6 +3,7 @@ import {
   finalizeAllocation,
   getAllBudgets,
   getAllocations,
+  sendPlanEmail,
   updateBudget
 } from '../controllers/budgetController.js';
 

@@ -2,6 +2,7 @@ import { Alert, Badge, Button, Card, Form, Tab, Table, Tabs } from 'react-bootst
 import React, { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import './BudgetApproval.css';
 
 const BudgetApprovalPage = () => {
   const [budget, setBudget] = useState(null);
@@ -123,43 +124,54 @@ const BudgetApprovalPage = () => {
         <span className="visually-hidden">Loading...</span>
       </div>
     </div>
-  );
-
-  return (
-    <div className="container py-4" style={{ marginLeft: '250px', maxWidth: '1200px' }}>
-      <Card className="mb-4">
-        <Card.Header className="bg-primary text-white">
-          <h2 className="mb-0">Budget Approval System</h2>
-        </Card.Header>
-        <Card.Body>
-          {budget && (
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h4>Current Budget</h4>
-                <h1 className="text-success">LKR {parseFloat(budget.budget).toLocaleString()}</h1>
-              </div>
-              <div className="text-end">
-                <small className="text-muted">Last Updated</small>
-                <div>{new Date(budget.updated_at).toLocaleString()}</div>
-              </div>
-            </div>
-          )}
-        </Card.Body>
-      </Card>
-
-      {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
-
-      <Tabs
-        activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k)}
-        className="mb-3"
+  );  return (
+    <div className="budget-container">
+      <h2
+        className="page-title"
+        style={{
+          color: '#f2b100', 
+          fontSize: '2rem', 
+          textAlign: 'left', 
+        }}
       >
+        Budget Approval Dashboard
+      </h2>
+        <div className="summary-cards">
+        {budget && (
+          <div className="summary-card blue-card">
+            <h3>Current Budget</h3>
+            <p>LKR {parseFloat(budget.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+            <small className="text-muted">Last Updated: {new Date(budget.updated_at).toLocaleDateString()}</small>
+          </div>
+        )}
+        
+        <div className="summary-card green-card">
+          <h3>Pending Approvals</h3>
+          <p>{pendingAllocations.length} Items</p>
+        </div>
+        
+        <div className="summary-card purple-card">
+          <h3>Completed Reviews</h3>
+          <p>{historyAllocations.length} Items</p>
+        </div>
+      </div>
+        {error && <Alert variant="danger" className="mb-4">{error}</Alert>}      
+      <div className="allocations-section">
+        <div className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h3>Budget Allocations</h3>
+        </div>
+        
+        <Tabs
+          activeKey={activeTab}
+          onSelect={(k) => setActiveTab(k)}
+          className="mb-3 custom-tabs"
+          style={{ borderBottom: '1px solid #dee2e6' }}
+        >
         <Tab eventKey="pending" title={`Pending Approvals (${pendingAllocations.length})`}>
           <div className="mt-3">
             {pendingAllocations.length > 0 ? (
-              <>
-                <Table striped bordered hover responsive>
-                  <thead className="table-dark">
+              <>                <Table striped bordered hover responsive>
+                  <thead className="table-warning text-dark">
                     <tr>
                       <th>Description</th>
                       <th>Location</th>
@@ -176,11 +188,26 @@ const BudgetApprovalPage = () => {
                       <tr key={allocation.id}>
                         <td>{allocation.description}</td>
                         <td>{allocation.district}, {allocation.zone}</td>
-                        <td className="text-end">{parseFloat(allocation.allocated_amount).toLocaleString()}</td>
-                        <td className="text-center">
-                          <Badge bg={allocation.priority <= 2 ? 'danger' : 'warning'}>
+                        <td className="text-end">{parseFloat(allocation.allocated_amount).toLocaleString()}</td>                        <td>
+                          <span 
+                            className="priority-badge" 
+                            style={{ 
+                              backgroundColor: allocation.priority === 1 ? '#FF5252' : // Red for high priority
+                                              allocation.priority === 2 ? '#FFAB40' : // Orange for medium priority
+                                              allocation.priority === 3 ? '#69F0AE' : // Green for low priority
+                                              '#B388FF', // Purple for very low priority
+                              display: 'inline-block',
+                              width: '28px',
+                              height: '28px',
+                              borderRadius: '50%',
+                              textAlign: 'center',
+                              lineHeight: '28px',
+                              color: '#fff',
+                              fontWeight: 'bold'
+                            }}
+                          >
                             {allocation.priority}
-                          </Badge>
+                          </span>
                         </td>
                         <td>{allocation.component || 'N/A'}</td>
                         <td>{allocation.subcomponent || 'N/A'}</td>
@@ -208,14 +235,20 @@ const BudgetApprovalPage = () => {
                       </tr>
                     ))}
                   </tbody>
-                </Table>
-
-                <div className="d-flex justify-content-end mt-3">
+                </Table>                <div className="d-flex justify-content-end mt-4 mb-3">
                   <Button 
-                    variant="primary" 
+                    variant="warning"
                     size="lg"
                     onClick={handleSubmit}
                     disabled={submitLoading || Object.keys(selectedStatus).length === 0}
+                    style={{
+                      backgroundColor: '#f2b100',
+                      border: 'none',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      padding: '10px 20px',
+                      borderRadius: '4px',
+                      fontWeight: 'bold'
+                    }}
                   >
                     {submitLoading ? (
                       <>
@@ -238,9 +271,8 @@ const BudgetApprovalPage = () => {
 
         <Tab eventKey="history" title={`History (${historyAllocations.length})`}>
           <div className="mt-3">
-            {historyAllocations.length > 0 ? (
-              <Table striped bordered hover responsive>
-                <thead className="table-dark">
+            {historyAllocations.length > 0 ? (              <Table striped bordered hover responsive>
+                <thead className="table-warning text-dark">
                   <tr>
                     <th>Description</th>
                     <th>Location</th>
@@ -258,25 +290,33 @@ const BudgetApprovalPage = () => {
                       <td>{allocation.district}, {allocation.zone}</td>
                       <td className="text-end">{parseFloat(allocation.allocated_amount).toLocaleString()}</td>
                       <td>{allocation.component || 'N/A'}</td>
-                      <td>{allocation.subcomponent || 'N/A'}</td>
-                      <td>
-                        <Badge bg={allocation.status === 'PDApproved' ? 'success' : 'danger'}>
+                      <td>{allocation.subcomponent || 'N/A'}</td>                      <td>
+                        <span className={`status-badge ${allocation.status.toLowerCase()}`}
+                          style={{
+                            backgroundColor: allocation.status === 'PDApproved' ? '#28a745' : '#dc3545', 
+                            color: '#fff',
+                            padding: '5px 10px',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold',
+                            display: 'inline-block'
+                          }}
+                        >
                           {allocation.status}
-                        </Badge>
+                        </span>
                       </td>
                       <td>{new Date(allocation.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
-              </Table>
-            ) : (
+              </Table>            ) : (
               <Alert variant="info">
                 No approval history available.
               </Alert>
             )}
-          </div>
-        </Tab>
+          </div>        </Tab>
       </Tabs>
+      </div>
     </div>
   );
 };

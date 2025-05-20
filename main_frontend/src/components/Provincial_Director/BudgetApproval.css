@@ -1,0 +1,26 @@
+/* BudgetApproval.css */
+
+/* Import the shared styles from FinalApprovals.css */
+@import './FinalApprovals.css';
+
+/* Additional custom styles for BudgetApprovalPage */
+.custom-tabs .nav-link {
+  color: #495057;
+  font-weight: 500;
+}
+
+.custom-tabs .nav-link.active {
+  color: #f2b100 !important;
+  border-color: #f2b100 !important;
+  border-bottom: 3px solid #f2b100 !important;
+}
+
+/* Override table styling */
+thead.table-warning {
+  background-color: #fff8e1 !important;
+}
+
+.table td, .table th {
+  padding: 0.75rem;
+  vertical-align: middle;
+}

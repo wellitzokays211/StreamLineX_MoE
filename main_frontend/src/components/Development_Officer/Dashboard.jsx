@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Alert, Badge, Button, Card, Col, Container, Form, InputGroup, ListGroup, ProgressBar, Row, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import React, { useEffect, useState } from 'react';
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
 
 import axios from 'axios';
 
@@ -11,6 +13,9 @@ const Dashboard = () => {
   const [budgets, setBudgets] = useState([]);
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
+  const [prioritizedActivities, setPrioritizedActivities] = useState([]); // All activities with assigned priorities
+  const [filteredPriorityList, setFilteredPriorityList] = useState([]);
+  const [priorityListSearch, setPriorityListSearch] = useState('');
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [totalAllocated, setTotalAllocated] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,6 +72,21 @@ const Dashboard = () => {
     setFilteredActivities(filtered);
   }, [activities, searchTerm, filterPriority]);
 
+  // Filter prioritized activities when search changes
+  useEffect(() => {
+    let filtered = prioritizedActivities;
+    
+    // Apply search filter
+    if (priorityListSearch) {
+      filtered = filtered.filter(activity => 
+        activity.description.toLowerCase().includes(priorityListSearch.toLowerCase()) ||
+        activity.zone.toLowerCase().includes(priorityListSearch.toLowerCase())
+      );
+    }
+    
+    setFilteredPriorityList(filtered);
+  }, [prioritizedActivities, priorityListSearch]);
+
   const fetchBudgets = async () => {
     try {
       const response = await axios.get('http://localhost:4000/api/budgets/get');
@@ -79,11 +99,28 @@ const Dashboard = () => {
       console.error('Error fetching budgets:', error);
     }
   };
-
   const fetchActivities = async () => {
     try {
       const response = await axios.get('http://localhost:4000/api/update_activity/get');
       setActivities(response.data.activities);
+      
+      // Filter all activities that have a priority assigned (for the Priority List)
+      const withPriority = response.data.activities.filter(activity => 
+        activity.priority !== null && 
+        activity.budget !== null
+      );
+
+      // Sort activities by priority (1 to 10, where lower number is higher priority)
+      const sortedActivities = [...withPriority].sort((a, b) => {
+        // Parse priority values to numbers for comparison
+        const priorityA = parseInt(a.priority);
+        const priorityB = parseInt(b.priority);
+        
+        // Compare priorities (ascending order)
+        return priorityA - priorityB;
+      });
+      
+      setPrioritizedActivities(sortedActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
     }
@@ -174,6 +211,87 @@ const Dashboard = () => {
       default: return 'secondary';
     }
   };
+  
+  // Generate PDF for Priority List
+  const generatePriorityListPDF = () => {
+    if (prioritizedActivities.length === 0) {
+      alert('No activities with priorities to generate report');
+      return;
+    }
+
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // Title of the PDF
+    doc.setFontSize(20);
+    doc.setTextColor(13, 71, 161); // #0D47A1
+    doc.setFont('helvetica', 'bold');
+    doc.text('Priority List', 148, 20, { align: 'center' });
+
+    // Date
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.setFont('helvetica', 'normal');
+    const today = new Date();
+    const dateString = today.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    doc.text(`Generated on: ${dateString}`, 148, 28, { align: 'center' });
+
+    // Priority Activities Table    doc.setFontSize(14);
+    doc.setTextColor(13, 71, 161);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Prioritized Activities', 20, 75);
+    
+    // Prepare table data
+    const tableData = prioritizedActivities.map((activity, index) => [
+      index + 1,
+      activity.description,
+      activity.zone,
+      formatCurrency(activity.budget),
+      activity.priority,
+      activity.status
+    ]);
+
+    // Generate table
+    autoTable(doc, {
+      startY: 80,
+      head: [['#', 'Description', 'Zone', 'Budget', 'Priority', 'Status']],
+      body: tableData,
+      headStyles: {
+        fillColor: [13, 71, 161], // #0D47A1
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 80 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 20, halign: 'center' },
+        5: { cellWidth: 30, halign: 'center' }
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+        overflow: 'linebreak'
+      }
+    });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Generated by StreamLineX', 148, 200, { align: 'center' });
+
+    // Save the PDF
+    doc.save(`Priority_List_${today.getFullYear()}.pdf`);
+  };
 
   // Finalize Budget Allocation function
   const handleFinalizeAllocation = async () => {
@@ -246,8 +364,7 @@ const Dashboard = () => {
         </Col>
         <Col md={3}>
           <Card className="text-left h-100 shadow-sm" style={{ borderLeft: '5px solid #0D47A1', borderRadius: 12 }}>
-            <Card.Body>
-              <h6 className="text-muted" style={{ textAlign: "left", fontSize: "1rem" }}>Remaining Budget</h6>
+            <Card.Body>              <h6 className="text-muted" style={{ textAlign: "left", fontSize: "1rem" }}>Remaining Budget</h6>
               <h3 className={`fw-bold text-${getBudgetStyle()}`} style={{ textAlign: "left", fontSize: "1.25rem", color: '#0D47A1' }}>
                 {formatCurrency(remainingBudget)}
               </h3>
@@ -451,6 +568,69 @@ const Dashboard = () => {
           ) : (
             <Alert variant="info">
               No activities matching your criteria are available.
+            </Alert>
+          )}
+        </Card.Body>
+      </Card>      {/* Priority List Card */}
+      <Card className="shadow-sm mb-4" style={{ borderRadius: 12 }}>
+        <Card.Header style={{ backgroundColor: "#0D47A1", color: "#fff", textAlign: "left" }}>
+          <Row className="align-items-center">
+            <Col>
+              <h5 className="mb-0" style={{ textAlign: 'left' }}>Priority List</h5>
+            </Col>
+            
+            <Col md={3} className="d-flex justify-content-end">
+              <Button
+                variant="outline-light"
+                size="sm"
+                onClick={generatePriorityListPDF}
+                disabled={prioritizedActivities.length === 0}
+              >
+                <i className="fas fa-file-pdf me-1"></i> Download Priority List
+              </Button>
+            </Col>
+          </Row>
+        </Card.Header><Card.Body>
+          {filteredPriorityList.length > 0 ? (
+            <div className="table-responsive">
+              <Table striped hover>
+                <thead className="table-light">
+                  <tr>
+                    <th>Description</th>
+                    <th>Zone</th>
+                    <th>Budget</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPriorityList.map((activity) => (
+                    <tr key={activity.id}>
+                      <td>{activity.description}</td>
+                      <td>
+                        <Badge bg="secondary">{activity.zone}</Badge>
+                      </td>
+                      <td>{formatCurrency(activity.budget)}</td>
+                      <td>
+                        <Badge bg={getPriorityBadge(activity.priority)}>
+                          {activity.priority}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge bg={activity.status === 'Accepted' ? 'success' : 
+                               activity.status === 'Pending' ? 'warning' : 
+                               activity.status === 'Rejected' ? 'danger' : 'info'}>
+                          {activity.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          ) : (
+            <Alert variant="info">
+              No activities with assigned priorities are available.
             </Alert>
           )}
         </Card.Body>

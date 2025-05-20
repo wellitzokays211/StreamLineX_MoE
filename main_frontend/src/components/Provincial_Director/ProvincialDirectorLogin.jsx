@@ -62,8 +62,8 @@ const SiteAuth = () => {
             <TextField              margin="normal"
               required
               fullWidth
-              label="Email"
-              type="email"
+              label="Username"
+              type="text"
               autoFocus
               value={loginData.email}
               onChange={(e) => setLoginData({...loginData, email: e.target.value})}

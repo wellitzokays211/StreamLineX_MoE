@@ -120,7 +120,7 @@ const Sidebar2 = () => {
     { text: 'Add Activity', icon: <AddCircleIcon />, path: '/Add' },
     { text: 'Activity List', icon: <FormatListBulletedIcon />, path: '/Activity' },
     { text: 'View Priority List', icon: <FormatListBulletedIcon />, path: '/priority-list' },
-    { text: 'Pending Annual Budget Plan', icon: <FormatListBulletedIcon />, path: '/budget-list' },
+    { text: 'Annual Development Plan', icon: <FormatListBulletedIcon />, path: '/budget-list' },
   ];
 
   return (

@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import nodemailer from 'nodemailer';
 
 // Add new budget
 export const addBudget = async (req, res) => {

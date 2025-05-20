@@ -33,10 +33,14 @@ const MyActivity = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [budget, setBudget] = useState('');
   const [priority, setPriority] = useState('');
-
-  const priorityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  // Only show activities with status exactly 'Accepted' (case-insensitive)
-  const acceptedActivities = allActivities.filter(activity => (activity.status && activity.status.toLowerCase() === 'accepted'));
+  const priorityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];  // Show all activities that have been accepted by the site engineer, regardless of PD approval status
+  const acceptedActivities = allActivities.filter(activity => 
+    activity.status && (
+      activity.status.toLowerCase() === 'accepted' || 
+      activity.status.toLowerCase() === 'pdapproved' || 
+      activity.status.toLowerCase() === 'pdrejected'
+    )
+  );
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -188,12 +192,20 @@ const MyActivity = () => {
                   <TableCell>{activity.status}</TableCell>
                   <TableCell>
                     {format(parseISO(activity.createdAt), 'MMM dd, yyyy HH:mm')}
-                  </TableCell>
-                  <TableCell>
+                  </TableCell>                  <TableCell>
                     <Button
                       variant="contained"
-                      color="primary"
+                      color={activity.status.toLowerCase() === 'pdapproved' ? 'secondary' : 'primary'}
                       onClick={() => handleOpenDialog(activity)}
+                      disabled={activity.status.toLowerCase() === 'pdapproved'}
+                      title={activity.status.toLowerCase() === 'pdapproved' ? 'Cannot edit PD approved activities' : ''}
+                      sx={{
+                        opacity: activity.status.toLowerCase() === 'pdapproved' ? 0.7 : 1,
+                        '&.Mui-disabled': {
+                          bgcolor: '#a0a0a0',
+                          color: '#ffffff'
+                        }
+                      }}
                     >
                       {activity.budget ? 'Edit' : 'Add Details'}
                     </Button>

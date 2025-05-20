@@ -44,18 +44,18 @@ const registerAdmin = async (req, res) => {
 const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const SELECT_ADMIN_QUERY = 'SELECT * FROM admins WHERE email = ?';
+        const SELECT_ADMIN_QUERY = 'SELECT * FROM provincial_director WHERE username = ?';
         const [rows] = await pool.query(SELECT_ADMIN_QUERY, [email]);
 
         if (rows.length === 0) {
-            return res.json({ success: false, message: "Invalid email or password" });
+            return res.json({ success: false, message: "Invalid email " });
         }
 
         const admin = rows[0];
         const isMatch = await bcrypt.compare(password, admin.password);
 
         if (!isMatch) {
-            return res.json({ success: false, message: "Invalid email or password" });
+            return res.json({ success: false, message: "Invalid password" });
         }
 
         const token = createToken(admin.id);

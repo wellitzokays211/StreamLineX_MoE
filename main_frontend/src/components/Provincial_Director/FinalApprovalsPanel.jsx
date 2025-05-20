@@ -260,7 +260,7 @@ const FinalApprovalsPanel = () => {
           textAlign: 'left', // left align
         }}
       >
-        Budget Allocation Management
+        Annual Development Plan
       </h2>
       
       <div className="controls">
@@ -357,9 +357,7 @@ const FinalApprovalsPanel = () => {
           <p>LKR {totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
          
         </div>
-      </div>
-
-      <div className="allocations-section">
+      </div>      <div className="allocations-section">
         <div className="table-header">
           <h3>All Allocations ({filteredAllocations.length})</h3>
           {filteredAllocations.length < allocations.length && (
@@ -416,6 +414,74 @@ const FinalApprovalsPanel = () => {
                   <td>{alloc.subcomponent || 'N/A'}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>        </div>
+      </div>
+        {/* Annual Development Plan - Separate box for PD Approved activities */}
+      <div className="allocations-section" style={{ marginTop: '30px' }}>
+        <div className="table-header">
+          <h3>Annual Development Plan</h3>
+          <button 
+            className="clear-filters-btn"
+            onClick={() => generatePDF()}
+            style={{ 
+              backgroundColor: '#f2b100',
+              border: 'none',
+              padding: '8px 15px',
+              borderRadius: '4px',
+              color: 'white',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            Generate PDF
+          </button>
+        </div>
+        
+        <div className="table-container">
+          <table className="allocations-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Location</th>
+                <th>Amount (LKR)</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Component</th>
+                <th>Subcomponent</th>
+              </tr>
+            </thead>
+            <tbody>              {pdApprovedActivities.map((alloc, index) => (
+                <tr key={`approved-${alloc.id}`} className={alloc.status.toLowerCase()}>
+                  <td>{index + 1}</td>
+                  <td>{alloc.description}</td>
+                  <td>{alloc.zone}, {alloc.district}</td>
+                  <td>LKR {parseFloat(alloc.allocated_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                  <td>
+                    <span 
+                      className="priority-badge" 
+                      style={{ backgroundColor: priorityColors[alloc.priority] || '#B388FF' }}
+                    >
+                      {alloc.priority}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${alloc.status.toLowerCase()}`}>
+                      {alloc.status}
+                    </span>
+                  </td>                  <td>{alloc.component || 'N/A'}</td>
+                  <td>{alloc.subcomponent || 'N/A'}</td>
+                </tr>
+              ))}
+              {/* Total row */}
+              {pdApprovedActivities.length > 0 && (
+                <tr className="total-row" style={{ fontWeight: 'bold', backgroundColor: '#f0f8ff' }}>
+                  <td colSpan={3} style={{ textAlign: 'left' }}>Final Allocated Budget </td>
+                  <td>LKR {totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                  <td colSpan={4}></td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

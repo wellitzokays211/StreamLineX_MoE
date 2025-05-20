@@ -11,13 +11,35 @@ const PendingBudgetList = () => {
   const [allocations, setAllocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterZone, setFilterZone] = useState('All');
+  const [filterZone, setFilterZone] = useState('All');  
   const [sortBy, setSortBy] = useState('priority');
   const [openPrintDialog, setOpenPrintDialog] = useState(false);
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     fetchAllData();
   }, []);
+  
+  // Function to handle column header clicks for sorting
+  const handleSort = (column) => {
+    if (column === 'priority') {
+      // Toggle between priority and priority-desc
+      setSortBy(sortBy === 'priority' ? 'priority-desc' : 'priority');
+    } else if (column === 'amount') {
+      // Toggle between amount and amount-asc
+      setSortBy(sortBy === 'amount' ? 'amount-asc' : 'amount');
+    }
+  };
+
+  // Get sorting indicator arrow based on current sort state
+  const getSortIndicator = (column) => {
+    if (column === 'priority' && (sortBy === 'priority' || sortBy === 'priority-desc')) {
+      return sortBy === 'priority' ? ' ↑' : ' ↓';
+    } else if (column === 'amount' && (sortBy === 'amount' || sortBy === 'amount-asc')) {
+      return sortBy === 'amount' ? ' ↓' : ' ↑';
+    }
+    return '';
+  };
 
   const fetchAllData = async () => {
     try {
@@ -37,15 +59,27 @@ const PendingBudgetList = () => {
   };
 
   // Get unique zones for filter dropdown
-  const zones = ['All', ...new Set(allocations.map(alloc => alloc.zone))];
-
-  // Filter and sort allocations
+  const zones = ['All', ...new Set(allocations.map(alloc => alloc.zone))];  // Filter and sort allocations
   const filteredAllocations = allocations
-    .filter(alloc => filterZone === 'All' || alloc.zone === filterZone)
+    .filter(alloc => (filterZone === 'All' || alloc.zone === filterZone) && alloc.status === 'PDApproved')
     .sort((a, b) => {
+      // Sort by priority (ascending - lower numbers first)
       if (sortBy === 'priority') return a.priority - b.priority;
-      if (sortBy === 'amount') return b.allocated_amount - a.allocated_amount;
-      return new Date(b.created_at) - new Date(a.created_at);
+      
+      // Sort by priority (descending - higher numbers first)
+      if (sortBy === 'priority-desc') return b.priority - a.priority;
+      
+      // Sort by amount (descending - higher amounts first)
+      if (sortBy === 'amount') return parseFloat(b.allocated_amount) - parseFloat(a.allocated_amount);
+      
+      // Sort by amount (ascending - lower amounts first)
+      if (sortBy === 'amount-asc') return parseFloat(a.allocated_amount) - parseFloat(b.allocated_amount);
+      
+      if (sortBy === 'date') {
+        // Sort by createdAt date in descending order (newest first)
+        return new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at);
+      }
+      return 0; // Default case
     });
 
   // Get PDApproved activities
@@ -103,29 +137,25 @@ const PendingBudgetList = () => {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(0);
-    
-    // Summary boxes
+      // Summary boxes
     doc.setFillColor(225, 245, 254);
-    doc.rect(20, 45, 50, 15, 'F');
-    doc.rect(80, 45, 50, 15, 'F');
-    doc.rect(140, 45, 50, 15, 'F');
+    doc.rect(20, 45, 70, 15, 'F');
+    doc.rect(110, 45, 70, 15, 'F');
     
     doc.setTextColor(33, 150, 243);
     doc.setFont('helvetica', 'bold');
-    doc.text('Total Budget', 25, 52);
-    doc.text('Total Allocated', 85, 52);
-    doc.text('PD Approved', 145, 52);
+    doc.text('Total Budget', 30, 52);
+    doc.text('Final Allocated Budget', 120, 52);
     
     doc.setTextColor(0);
-    doc.text(`LKR ${totalBudget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 25, 58);
-    doc.text(`LKR ${totalAllocated.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 85, 58);
-    doc.text(`LKR ${totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 145, 58);
+    doc.text(`LKR ${totalBudget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 30, 58);
+    doc.text(`LKR ${totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 120, 58);
 
     // Approved Activities Table
     doc.setFontSize(14);
     doc.setTextColor(33, 150, 243);
     doc.setFont('helvetica', 'bold');
-    doc.text('PD Approved Activities', 20, 75);
+    doc.text('Annual Development Activities', 20, 75);
 
     // Prepare table data
     const tableData = pdApprovedActivities.map((activity, index) => [
@@ -224,8 +254,7 @@ const PendingBudgetList = () => {
     }
     const header = [
       'No', 'Description', 'Zone', 'District', 'Component', 'Subcomponent', 'Amount (LKR)', 'Priority'
-    ];
-    const rows = pdApprovedActivities.map((activity, index) => [
+    ];    const rows = pdApprovedActivities.map((activity, index) => [
       index + 1,
       activity.description,
       activity.zone,
@@ -235,6 +264,19 @@ const PendingBudgetList = () => {
       parseFloat(activity.allocated_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}),
       activity.priority
     ]);
+    
+    // Add total row for Excel
+    rows.push([
+      '',
+      'Final Allocated Budget (Total):',
+      '',
+      '',
+      '',
+      '',
+      totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+      ''
+    ]);
+    
     let csvContent = '';
     csvContent += header.join(',') + '\n';
     rows.forEach(row => {
@@ -260,10 +302,52 @@ const PendingBudgetList = () => {
   const handlePrintPDF = () => {
     setOpenPrintDialog(false);
     generatePDF();
-  };
-  const handlePrintExcel = () => {
+  };  const handlePrintExcel = () => {
     setOpenPrintDialog(false);
     generateExcel();
+  };
+  
+  // Function to send plan to Ministry of Education
+  const sendToMoE = async () => {
+    if (pdApprovedActivities.length === 0) {
+      alert('No PD Approved activities to send');
+      return;
+    }
+    
+    try {
+      // Prepare data for email
+      const emailData = {
+        to: 'walahewa.sanduni@gmail.com',
+        subject: `Annual Development Plan - ${new Date().getFullYear()}`,
+        text: `Please find attached the Annual Development Plan for ${new Date().getFullYear()}`,
+        planData: {
+          totalBudget,
+          totalPDApproved,
+          activities: pdApprovedActivities.map((activity, index) => ({
+            no: index + 1,
+            description: activity.description,
+            zone: activity.zone,
+            district: activity.district,
+            component: activity.component || 'N/A',
+            subcomponent: activity.subcomponent || 'N/A',
+            amount: parseFloat(activity.allocated_amount),
+            priority: activity.priority
+          }))
+        }
+      };
+      
+      // Send email
+      const response = await axios.post('http://localhost:4000/api/budgets/send-plan-email', emailData);
+      
+      if (response.data.success) {
+        alert('Annual Development Plan successfully sent to the Ministry of Education');
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Failed to send the plan. Please try again later.');
+    }
   };
 
   if (loading) return <div className="loading">Loading budget allocations...</div>;
@@ -284,37 +368,31 @@ const PendingBudgetList = () => {
               <option key={zone} value={zone}>{zone}</option>
             ))}
           </select>
-        </div>
-        <div className="sort-control">
+        </div>        <div className="sort-control">
           <label>Sort by:</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="styled-select"
           >
-            <option value="priority">Priority</option>
+            <option value="priority">Priority (Low to High)</option>
+            <option value="priority-desc">Priority (High to Low)</option>
             <option value="amount">Amount (High to Low)</option>
-            <option value="date">Date (Newest First)</option>
+            <option value="amount-asc">Amount (Low to High)</option>
           </select>
         </div>
-      </div>
-      <div className="summary-cards">
+      </div>      <div className="summary-cards">
         <div className="summary-card blue-card">
           <h3>Total Budget</h3>
           <p>LKR {totalBudget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
         </div>
-        <div className="summary-card green-card">
-          <h3>Total Allocated</h3>
-          <p>LKR {totalAllocated.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-        </div>
         <div className="summary-card purple-card">
-          <h3>PD Approved</h3>
+          <h3>Final Allocated Budget</h3>
           <p>LKR {totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
         </div>
-      </div>
-      <div className="allocations-section">
+      </div><div className="allocations-section">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>All Allocations</h3>
+          <h3 style={{ margin: 0 }}>Annual Development Plan</h3>
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <button 
               className="download-btn pdf-btn small-btn"
@@ -340,8 +418,7 @@ const PendingBudgetList = () => {
                 <th>Subcomponent</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredAllocations.map((alloc, index) => (
+            <tbody>              {filteredAllocations.map((alloc, index) => (
                 <tr key={alloc.id} className={alloc.status.toLowerCase()}>
                   <td>{index + 1}</td>
                   <td>{alloc.description}</td>
@@ -365,6 +442,14 @@ const PendingBudgetList = () => {
                   <td>{alloc.subcomponent || 'N/A'}</td>
                 </tr>
               ))}
+              {/* Total row */}
+              {filteredAllocations.length > 0 && (
+                <tr className="total-row" style={{ fontWeight: 'bold', backgroundColor: '#f0f8ff' }}>
+                  <td colSpan={3} style={{ textAlign: 'left' }}>Final Allocated Budget</td>
+                  <td>LKR {totalPDApproved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                  <td colSpan={4}></td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
