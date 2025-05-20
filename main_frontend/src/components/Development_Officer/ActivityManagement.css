@@ -1,0 +1,101 @@
+/* ActivityManagement.css - Styled to match Dashboard look */
+
+.activity-management-container {
+  padding: 32px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  margin-left: 250px;
+  max-width: 1200px;
+}
+
+.activity-management-header {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.07);
+  padding: 24px 32px 16px 32px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #0D47A1;
+}
+
+.activity-management-header h1 {
+  color: #0D47A1;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.activity-management-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.activity-management-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.07);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.activity-card {
+  border-left: 5px solid #0D47A1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.07);
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.activity-card:hover {
+  box-shadow: 0 8px 24px rgba(13,71,161,0.13);
+  transform: translateY(-4px);
+}
+
+.activity-card .MuiCardHeader-title {
+  font-weight: 600;
+  color: #0D47A1;
+}
+
+.activity-card .MuiChip-root {
+  font-weight: 500;
+}
+
+.activity-card .MuiCardContent-root {
+  padding-bottom: 0;
+}
+
+.activity-card .MuiDivider-root {
+  margin: 12px 0;
+}
+
+.activity-card .MuiTypography-body2 {
+  color: #333;
+}
+
+.activity-card .MuiAvatar-root {
+  background-color: #0D47A1 !important;
+  color: #fff !important;
+}
+
+.activity-card .MuiButton-containedPrimary {
+  background-color: #0D47A1;
+  border-radius: 8px;
+}
+
+.activity-card .MuiButton-containedPrimary:hover {
+  background-color: #08306b;
+}
+
+.activity-management-dialog .MuiDialogTitle-root {
+  background: #0D47A1;
+  color: #fff;
+}
+
+.activity-management-dialog .MuiDialogContent-root {
+  background: #f5f7fa;
+}
+
+.activity-management-dialog .MuiDialogActions-root {
+  background: #f5f7fa;
+}

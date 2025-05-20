@@ -1,0 +1,18 @@
+/* General styling for the container */
+.container-fluid {
+  padding: 0;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #f8f9fa; /* Adjust as needed */
+  padding-top: 20px;
+  /* Optional styling for sidebar */
+}
+
+

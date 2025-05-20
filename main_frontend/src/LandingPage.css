@@ -1,0 +1,28 @@
+/* LandingPage.css: minimal styles for layout and responsiveness */
+.landing-flex-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+@media (max-width: 767px) {
+  .landing-flex-col header nav {
+    display: none !important;
+  }
+}
+
+/* Blue theme overrides */
+.bg-primary.bg-opacity-10 {
+  background-color: rgba(13, 80, 180, 0.10) !important; /* darker blue */
+}
+.text-primary {
+  color: #0d50b4 !important; /* darker blue */
+}
+.btn-primary {
+  background-color: #0d50b4 !important;
+  border-color: #0d50b4 !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #0b469e !important;
+  border-color: #093b85 !important;
+}

@@ -1,0 +1,84 @@
+/* RoleSelection.css */
+.role-selection-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+  margin-left: -500px;
+}
+
+.role-selection-header h2 {
+  font-weight: 600;
+  color: #605858;
+  font-size: 4rem;
+}
+
+.role-selection-header p {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 2rem;
+}
+.role-card {
+  cursor: pointer;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 2px 12px rgba(13,80,180,0.07);
+  height: 100%;
+  background: #fff;
+  position: relative;
+}
+
+.role-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--role-color);
+}
+
+.role-card:hover, .role-card:focus {
+  box-shadow: 0 4px 24px rgba(13,80,180,0.13);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.role-icon {
+  transition: transform 0.3s ease;
+  font-size: 2.5rem;
+  color: #0d50b4;
+}
+
+.role-card:hover .role-icon {
+  transform: scale(1.1);
+}
+
+.role-cta {
+  display: inline-flex;
+  align-items: center;
+  color: #0d50b4;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.role-card:hover .role-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .role-selection-wrapper {
+    padding: 1rem;
+  }
+  
+  .role-selection-header h2 {
+    font-size: 1.5rem;
+  }
+}

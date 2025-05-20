@@ -1,0 +1,153 @@
+/* PendingBudgetList.css - Dashboard style update */
+
+.budget-container {
+  padding: 32px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  margin-left: 250px;
+  max-width: 1200px;
+}
+
+.page-title {
+  color: #0D47A1;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: left;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #0D47A1;
+  padding-bottom: 8px;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.07);
+  padding: 24px 32px;
+  flex: 1 1 200px;
+  min-width: 200px;
+  text-align: left;
+}
+
+.summary-card h3 {
+  color: #0D47A1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.summary-card p {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.blue-card { border-left: 5px solid #0D47A1; }
+.green-card { border-left: 5px solid #2ecc71; }
+.purple-card { border-left: 5px solid #9b59b6; }
+
+.allocations-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.07);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.allocations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.allocations-table th, .allocations-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.allocations-table th {
+  background: #f5f7fa;
+  color: #0D47A1;
+  font-weight: 600;
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: #e0e0e0;
+  color: #333;
+}
+
+.status-badge.PDApproved { background: #2ecc71; color: #fff; }
+.status-badge.PDRejected { background: #e74c3c; color: #fff; }
+
+.download-btn {
+  background: #0D47A1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.download-btn:hover { background: #08306b; }
+
+.table-container {
+  overflow-x: auto;
+}
+
+.controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter-control, .sort-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.styled-select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: white;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.styled-select:focus {
+  border-color: #0D47A1;
+  outline: none;
+}
+
+.loading, .error {
+  color: #0D47A1;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-top: 60px;
+}

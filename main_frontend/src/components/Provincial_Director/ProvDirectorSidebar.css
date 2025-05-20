@@ -1,0 +1,74 @@
+/* Sidebar4 Styles */
+.sidebar4 {
+  width: 250px;
+  background: linear-gradient(to bottom, #f2b100, #f2b100);
+  color: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar4 .MuiDrawer-paper {
+  width: 250px !important;
+  background: linear-gradient(to bottom, #f2b100, #f2b100) !important;
+  color: white !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sidebar4 .MuiAppBar-root {
+  background-color: #f2b100 !important;
+}
+
+.sidebar4-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar4-avatar {
+  background-color: #fff8e1 !important;
+  color: #f2b100 !important;
+}
+
+.sidebar4-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+
+
+.sidebar4-chip {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #fff !important;
+  background-color: #f2b100 !important;
+}
+
+.sidebar4-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  
+}
+
+.sidebar4-menu-container {
+  overflow: auto;
+  overflow-x: hidden;
+  margin-top: 16px;
+}
+
+.sidebar4-footer {
+  margin-top: auto;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .sidebar4 {
+    width: 240px;
+  }
+  .sidebar4-content {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,74 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar Styles for permanent and temporary state */
+.sidebar {
+  width: 500px; /* Default width for larger screens */
+  background: linear-gradient(to bottom, #1b5e20, #1b5e20); 
+  color: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Temporary sidebar for mobile view */
+.MuiDrawer-paper {
+  width: 240px !important;
+  background: linear-gradient(to bottom, #1b5e20, #2e7d32) !important; /* Dark green to medium green gradient */
+  color: white !important;
+  box-sizing: border-box;
+}
+
+/* App Bar (mobile header) styling */
+.MuiAppBar-root {
+  background-color: #1b5e20 !important; /* Dark green */
+}
+
+/* Content Area */
+.content {
+  margin-left: 240px; /* Default margin for larger screens */
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Avatar styling */
+.sidebar-avatar {
+  background-color: #e8f5e9 !important; /* Very light green */
+  color: #1b5e20 !important; /* Dark green */
+}
+
+/* List item hover effect */
+.sidebar-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+/* List item hover effect */
+.sidebar-menu-item {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+/* Divider color */
+.sidebar-divider {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Chip styling */
+.sidebar-chip {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px; /* Sidebar is slightly smaller on mobile */
+  }
+
+  .content {
+    margin-left: 0;
+  }
+}

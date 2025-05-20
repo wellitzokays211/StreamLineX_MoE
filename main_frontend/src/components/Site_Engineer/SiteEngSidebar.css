@@ -1,0 +1,71 @@
+/* Sidebar3 Styles */
+
+
+.sidebar3 .MuiDrawer-paper {
+  width: 250px;
+  background: linear-gradient(to bottom, #732196, #732196) !important;
+  color: white !important;
+  box-sizing: border-box;
+   
+  overflow: hidden;
+}
+
+.sidebar3 .MuiAppBar-root {
+  background-color: #4a148c !important;
+}
+
+.sidebar3-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar3-avatar {
+  background-color: #f3e5f5 !important;
+  color: #4a148c !important;
+}
+
+.sidebar3-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar3-menu-item{
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: white;
+}
+
+.sidebar3-divider {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.sidebar3-chip {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.sidebar3-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+}
+
+.sidebar3-menu-container {
+  overflow: auto;
+  overflow-x: hidden;
+  margin-top: 16px;
+}
+
+.sidebar3-footer {
+  margin-top: auto;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .sidebar3 {
+    width: 240px;
+  }
+  
+  .sidebar3-content {
+    margin-left: 0;
+  }
+}

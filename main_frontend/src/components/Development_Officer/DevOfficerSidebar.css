@@ -1,0 +1,92 @@
+/* Sidebar2 Styles for permanent and temporary state */
+
+.sidebar2, .sidebar2 * {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  letter-spacing: 0.01em;
+}
+
+/* Temporary sidebar2 for mobile view */
+.sidebar2 .MuiDrawer-paper {
+  width: 240px !important;
+  background: linear-gradient(to bottom, #0D47A1, #0D47A1) !important;
+  color: white !important;
+  box-sizing: border-box;
+  overflow: hidden !important; /* Hide scrollbars and overflowing content */
+}
+
+/* App Bar (mobile header) styling */
+.sidebar2 .MuiAppBar-root {
+  background-color: #0D47A1 !important;
+  overflow: hidden !important;
+}
+
+/* Content Area */
+.sidebar2-content {
+  margin-left: 240px; /* Default margin for larger screens */
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+  overflow: hidden; /* Prevent overflow in content */
+}
+
+/* Avatar styling */
+.sidebar2-avatar {
+  background-color: #e8eaf6 !important;
+  color: #0D47A1 !important;
+  overflow: hidden;
+}
+
+/* List item hover effect */
+.sidebar2-menu-item {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white;
+  overflow: hidden;
+}
+
+.sidebar2-menu-item .MuiListItemText-primary {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.sidebar2-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Divider color */
+.sidebar2-divider {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  overflow: hidden;
+}
+
+/* Chip styling */
+.sidebar2-chip {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.sidebar2-header .MuiTypography-root {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .sidebar2 {
+    width: 200px;
+    overflow: hidden; /* Ensure it hides overflow on smaller screens too */
+  }
+
+  .sidebar2-content {
+    margin-left: 0;
+    overflow: hidden;
+  }
+}
+
+.MuiModal-root .MuiBox-root, .MuiModal-root .MuiTypography-root, .MuiModal-root .MuiButton-root, .MuiModal-root .MuiTextField-root {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+}
