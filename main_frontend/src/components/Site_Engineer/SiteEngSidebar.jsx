@@ -84,12 +84,55 @@ const Sidebar3 = () => {
     localStorage.removeItem('user');
     navigate('/');
   };
+  const [errors, setErrors] = useState({});
+
+  const validateInputs = () => {
+    const newErrors = {};
+    
+    // Validate name
+    if (!form.engineer_name) {
+      newErrors.engineer_name = 'Name is required';
+    } else if (form.engineer_name.length > 50) {
+      newErrors.engineer_name = 'Name cannot exceed 50 characters';
+    } else if (!/^[A-Za-z][A-Za-z\s'\-\.]*[A-Za-z]$/.test(form.engineer_name)) {
+      newErrors.engineer_name = 'Name should start and end with a letter';
+    } else if (/[\s'\-\.]{2,}/.test(form.engineer_name)) {
+      newErrors.engineer_name = 'No consecutive spaces or symbols allowed';
+    }
+
+    // Validate phone number
+    if (!form.tel_num) {
+      newErrors.tel_num = 'Phone number is required';
+    } else if (!form.tel_num.match(/^0\d{9}$/)) {
+      newErrors.tel_num = 'Phone number must be 10 digits and start with 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    if (name === 'tel_num') {
+      // Only allow numbers and limit to 10 digits
+      const numericValue = value.replace(/[^\d]/g, '');
+      if (numericValue.length <= 10) {
+        setForm({ ...form, [name]: numericValue });
+      }
+    } else if (name === 'engineer_name') {
+      // Only update if name format is valid or empty
+      if (!value || /^[A-Za-z]?[A-Za-z\s'\-\.]*[A-Za-z]?$/.test(value)) {
+        setForm({ ...form, [name]: value });
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleUpdate = async () => {
+    if (!validateInputs()) return;
+    
     try {
       const token = localStorage.getItem('token');
       const res = await axios.put(
@@ -100,6 +143,8 @@ const Sidebar3 = () => {
 
       if (res.data.success) {
         setEngineer({ ...engineer, ...form });
+        setProfileDialogOpen(false);
+        setErrors({});
       } else {
         alert('Update failed');
       }
@@ -231,8 +276,7 @@ const Sidebar3 = () => {
 
       {/* Edit Profile Dialog */}
       <Dialog open={profileDialogOpen} onClose={() => setProfileDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 600 }}>Update Engineer Details</DialogTitle>
-        <DialogContent dividers sx={{ bgcolor: '#fafafa' }}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Update Engineer Details</DialogTitle>        <DialogContent dividers sx={{ bgcolor: '#fafafa' }}>
           <TextField
             fullWidth
             label="Name"
@@ -240,6 +284,9 @@ const Sidebar3 = () => {
             value={form.engineer_name}
             onChange={handleInputChange}
             margin="normal"
+            error={!!errors.engineer_name}
+            helperText={errors.engineer_name}
+            inputProps={{ maxLength: 50 }}
           />
           <TextField
             fullWidth
@@ -248,6 +295,7 @@ const Sidebar3 = () => {
             value={form.email}
             onChange={handleInputChange}
             margin="normal"
+            disabled
           />
           <TextField
             fullWidth
@@ -256,6 +304,9 @@ const Sidebar3 = () => {
             value={form.tel_num}
             onChange={handleInputChange}
             margin="normal"
+            error={!!errors.tel_num}
+            helperText={errors.tel_num}
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           />
       
         </DialogContent>

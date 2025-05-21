@@ -89,12 +89,68 @@ const Sidebar2 = () => {
   const handleModalClose = () => {
     setModalOpen(false);
   };
+  const [errors, setErrors] = useState({});
+
+  const validateInputs = () => {
+    const newErrors = {};
+    
+    // Validate name
+    if (!form.officer_name) {
+      newErrors.officer_name = 'Name is required';
+    } else if (form.officer_name.length > 50) {
+      newErrors.officer_name = 'Name cannot exceed 50 characters';
+    } else if (!/^[A-Za-z][A-Za-z\s'\-\.]*[A-Za-z]$/.test(form.officer_name)) {
+      newErrors.officer_name = 'Name should start and end with a letter';
+    } else if (/[\s'\-\.]{2,}/.test(form.officer_name)) {
+      newErrors.officer_name = 'No consecutive spaces or symbols allowed';
+    }
+
+    // Validate phone number
+    if (!form.tel_num) {
+      newErrors.tel_num = 'Phone number is required';
+    } else if (!form.tel_num.match(/^0\d{9}$/)) {
+      newErrors.tel_num = 'Phone number must be 10 digits and start with 0';
+    }
+
+    // Validate NIC
+    if (!form.nic) {
+      newErrors.nic = 'NIC is required';
+    } else if (!/^\d{9}[Vv]$/.test(form.nic) && !/^\d{12}$/.test(form.nic)) {
+      newErrors.nic = 'Please enter a valid NIC (e.g., 880123456V or 199012345678)';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    if (name === 'tel_num') {
+      // Only allow numbers and limit to 10 digits
+      const numericValue = value.replace(/[^\d]/g, '');
+      if (numericValue.length <= 10) {
+        setForm({ ...form, [name]: numericValue });
+      }
+    } else if (name === 'nic') {
+      // Allow only digits and V/v for NIC
+      const nicValue = value.replace(/[^\dVv]/g, '');
+      if (nicValue.length <= 12) {
+        setForm({ ...form, [name]: nicValue });
+      }
+    } else if (name === 'officer_name') {
+      // Only update if name format is valid or empty
+      if (!value || /^[A-Za-z]?[A-Za-z\s'\-\.]*[A-Za-z]?$/.test(value)) {
+        setForm({ ...form, [name]: value });
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleUpdate = async () => {
+    if (!validateInputs()) return;
+    
     try {
       const res = await axios.put(
         'http://localhost:4000/api/dev_office/update',
@@ -106,6 +162,7 @@ const Sidebar2 = () => {
       if (res.data.success) {
         fetchOfficer();
         setModalOpen(false);
+        setErrors({});
       }
     } catch (err) {
       console.error('Failed to update officer:', err);
@@ -250,14 +307,16 @@ const Sidebar2 = () => {
         >
           <Typography variant="h6" gutterBottom>
             Update Officer Details
-          </Typography>
-          <TextField
+          </Typography>          <TextField
             fullWidth
             label="Name"
             name="officer_name"
             value={form.officer_name}
             onChange={handleInputChange}
             margin="normal"
+            error={!!errors.officer_name}
+            helperText={errors.officer_name}
+            inputProps={{ maxLength: 50 }}
           />
           <TextField
             fullWidth
@@ -266,6 +325,7 @@ const Sidebar2 = () => {
             value={form.email}
             onChange={handleInputChange}
             margin="normal"
+            disabled
           />
           <TextField
             fullWidth
@@ -274,6 +334,9 @@ const Sidebar2 = () => {
             value={form.tel_num}
             onChange={handleInputChange}
             margin="normal"
+            error={!!errors.tel_num}
+            helperText={errors.tel_num}
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           />
           <TextField
             fullWidth
@@ -282,6 +345,8 @@ const Sidebar2 = () => {
             value={form.nic}
             onChange={handleInputChange}
             margin="normal"
+            error={!!errors.nic}
+            helperText={errors.nic}
           />
           <Button variant="contained" color="primary" fullWidth onClick={handleUpdate} sx={{ mt: 2 }}>
             Update

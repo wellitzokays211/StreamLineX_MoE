@@ -77,18 +77,64 @@ const Sidebar = () => {
     };
     fetchUser();
   }, []);
+  const [errors, setErrors] = useState({});
 
   const handleEditOpen = () => {
     setEditedName(user?.responsible_persons_name || '');
     setEditedTel(user?.tel_num || '');
     setEditOpen(true);
+    setErrors({});
   };
 
   const handleEditClose = () => {
     setEditOpen(false);
+    setErrors({});
+  };
+
+  const validateInputs = () => {
+    const newErrors = {};
+    
+    // Validate name
+    if (!editedName) {
+      newErrors.name = 'Name is required';
+    } else if (editedName.length > 50) {
+      newErrors.name = 'Name cannot exceed 50 characters';
+    } else if (!/^[A-Za-z][A-Za-z\s'\-\.]*[A-Za-z]$/.test(editedName)) {
+      newErrors.name = 'Name should start and end with a letter';
+    } else if (/[\s'\-\.]{2,}/.test(editedName)) {
+      newErrors.name = 'No consecutive spaces or symbols allowed';
+    }
+
+    // Validate phone number
+    if (!editedTel) {
+      newErrors.tel = 'Phone number is required';
+    } else if (!editedTel.match(/^0\d{9}$/)) {
+      newErrors.tel = 'Phone number must be 10 digits and start with 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    // Only update if name format is valid or empty
+    if (!value || /^[A-Za-z]?[A-Za-z\s'\-\.]*[A-Za-z]?$/.test(value)) {
+      setEditedName(value);
+    }
+  };
+
+  const handleTelChange = (e) => {
+    // Only allow numbers and limit to 10 digits
+    const value = e.target.value.replace(/[^\d]/g, '');
+    if (value.length <= 10) {
+      setEditedTel(value);
+    }
   };
 
   const handleSave = async () => {
+    if (!validateInputs()) return;
+    
     const token = localStorage.getItem('token');
     try {
       const res = await axios.put(
@@ -109,6 +155,7 @@ const Sidebar = () => {
           tel_num: editedTel,
         }));
         setEditOpen(false);
+        setErrors({});
       } else {
         alert('Failed to update user info');
       }
@@ -290,15 +337,17 @@ const Sidebar = () => {
         }}>
           Update Profile
         </DialogTitle>
-        <DialogContent sx={{ pt: 2, pb: 0 }}>
-          <TextField
+        <DialogContent sx={{ pt: 2, pb: 0 }}>          <TextField
             margin="normal"
             label="Name"
             fullWidth
             variant="outlined"
             value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
+            onChange={handleNameChange}
             InputLabelProps={{ style: { color: '#388e3c', fontWeight: 500 } }}
+            error={!!errors.name}
+            helperText={errors.name}
+            inputProps={{ maxLength: 50 }}
             sx={{
               input: { color: '#222', fontWeight: 500 },
               mb: 2,
@@ -312,8 +361,11 @@ const Sidebar = () => {
             fullWidth
             variant="outlined"
             value={editedTel}
-            onChange={(e) => setEditedTel(e.target.value)}
+            onChange={handleTelChange}
             InputLabelProps={{ style: { color: '#388e3c', fontWeight: 500 } }}
+            error={!!errors.tel}
+            helperText={errors.tel}
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             sx={{
               input: { color: '#222', fontWeight: 500 },
               bgcolor: '#f5f7fa',
