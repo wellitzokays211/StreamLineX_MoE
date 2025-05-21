@@ -89,9 +89,8 @@ const ActivityManagement = () => {
   const [selectedSubcomponent, setSelectedSubcomponent] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const statusOptions = ['Approved', 'Rejected'];
-  const filterOptions = ['All', 'Pending', 'Approved', 'Rejected', 'Not Started', 'On-Going', 'Completed', 'Accepted'];
+  const statusOptions = ['DO Accepted', 'Rejected'];
+  const filterOptions = ['All', 'Pending', 'Approved', 'Rejected', 'PDApproved'];
 
   const statusColors = {
     Pending: 'warning',
@@ -170,10 +169,13 @@ const ActivityManagement = () => {
   if (!selectedActivity || !selectedStatus) return;
 
   try {
+    // Convert 'DO Accepted' to 'Approved' for the backend
+    const statusForBackend = selectedStatus === 'DO Accepted' ? 'Approved' : selectedStatus;
+    
     const payload = {
       id: selectedActivity.id,
-      status: selectedStatus,
-      assigned_engineer_id: selectedStatus === 'Approved' ? selectedEngineer : null,
+      status: statusForBackend,
+      assigned_engineer_id: selectedStatus === 'DO Accepted' ? selectedEngineer : null,
       rejectionReason: selectedStatus === 'Rejected' ? rejectionReason : null, // Changed to match backend
       component: selectedComponent || null,
       subcomponent: selectedSubcomponent || null,
@@ -195,10 +197,10 @@ const ActivityManagement = () => {
     if (!engineer) return 'Not assigned';
     return `${engineer.name} (${engineer.specialization})`;
   };
-
   const getStatusMessage = (status) => {
     switch(status) {
       case 'Approved':
+      case 'DO Accepted':
         return 'Already Approved';
       case 'Rejected':
         return 'Already Rejected';
@@ -587,9 +589,8 @@ const ActivityManagement = () => {
               label="Status"
             >
               {statusOptions.map((status) => (
-                <MenuItem key={status} value={status}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {status === 'Approved' ? 
+                <MenuItem key={status} value={status}>                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {status === 'DO Accepted' ? 
                       <CheckCircleIcon fontSize="small" sx={{ mr: 1, color: theme.palette.success.main }} /> : 
                       <CancelIcon fontSize="small" sx={{ mr: 1, color: theme.palette.error.main }} />
                     }
@@ -693,14 +694,13 @@ const ActivityManagement = () => {
             sx={{ borderRadius: 4 }}
           >
             Cancel
-          </Button>
-          <Button 
+          </Button>          <Button 
             onClick={handleStatusUpdate} 
             color="primary" 
             variant="contained"
             disabled={
               !selectedStatus || 
-              (selectedStatus === 'Approved' && !selectedEngineer) ||
+              (selectedStatus === 'DO Accepted' && !selectedEngineer) ||
               (selectedStatus === 'Rejected' && !rejectionReason)
             }
             sx={{ 
