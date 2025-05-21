@@ -25,6 +25,9 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import React, { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 
@@ -78,14 +81,14 @@ const ActivityManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedEngineer, setSelectedEngineer] = useState('');
-  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [selectedEngineer, setSelectedEngineer] = useState('');  const [selectedActivity, setSelectedActivity] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
   const [selectedComponent, setSelectedComponent] = useState('');
   const [selectedSubcomponent, setSelectedSubcomponent] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const statusOptions = ['Approved', 'Rejected'];
   const filterOptions = ['All', 'Pending', 'Approved', 'Rejected', 'Not Started', 'On-Going', 'Completed', 'Accepted'];
@@ -151,7 +154,6 @@ const ActivityManagement = () => {
     setEditedDescription(activity.description || '');
     setDialogOpen(true);
   };
-
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedActivity(null);
@@ -161,6 +163,7 @@ const ActivityManagement = () => {
     setSelectedSubcomponent('');
     setRejectionReason('');
     setEditedDescription('');
+    setSelectedImageIndex(0);
   };
 
  const handleStatusUpdate = async () => {
@@ -327,8 +330,7 @@ const ActivityManagement = () => {
                   />
                 }
               />
-              
-              <CardContent sx={{ pt: 0, flexGrow: 1 }}>
+                <CardContent sx={{ pt: 0, flexGrow: 1 }}>
                 <Typography 
                   variant="body1" 
                   sx={{ 
@@ -347,6 +349,51 @@ const ActivityManagement = () => {
                   />
                   {activity.description}
                 </Typography>
+                
+                {/* Display image if available */}
+                {activity.images && activity.images.length > 0 && (
+                  <Box 
+                    sx={{ 
+                      mb: 2,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      borderRadius: 1,
+                      boxShadow: '0 0 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <img 
+                      src={`http://localhost:4000/images/${activity.images[0]}`}
+                      alt="Activity"
+                      style={{ 
+                        width: '100%',
+                        height: 140,
+                        objectFit: 'cover',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                        setSelectedActivity(activity);
+                        setDialogOpen('image');
+                      }}
+                    />
+                    {activity.images.length > 1 && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          bottom: 8,
+                          right: 8,
+                          backgroundColor: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          borderRadius: '4px',
+                          padding: '2px 6px',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        +{activity.images.length - 1}
+                      </Box>
+                    )}
+                  </Box>
+                )}
                 
                 <Divider sx={{ my: 1.5 }} />
                 
@@ -665,8 +712,98 @@ const ActivityManagement = () => {
             Update Status
           </Button>
         </DialogActions>
+      </Dialog>      {/* Image Dialog */}
+      <Dialog
+        open={dialogOpen === 'image'}
+        onClose={handleDialogClose}
+        maxWidth="md"
+        PaperProps={{ elevation: 5, sx: { borderRadius: 2, overflow: 'hidden' } }}
+      >
+        {selectedActivity && selectedActivity.images && selectedActivity.images.length > 0 && (
+          <>
+            <DialogTitle sx={{ bgcolor: theme.palette.primary.main, color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">
+                Activity #{selectedActivity.id} Images ({selectedImageIndex + 1}/{selectedActivity.images.length})
+              </Typography>
+              <IconButton size="small" onClick={handleDialogClose} sx={{ color: 'white' }}>
+                <CancelIcon />
+              </IconButton>
+            </DialogTitle>
+            <Box sx={{ position: 'relative', width: '100%', maxHeight: '70vh', display: 'flex', justifyContent: 'center', bgcolor: '#000' }}>
+              <img 
+                src={`http://localhost:4000/images/${selectedActivity.images[selectedImageIndex]}`}
+                alt={`Activity ${selectedActivity.id} - Image ${selectedImageIndex + 1}`}
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '70vh',
+                  objectFit: 'contain'
+                }} 
+              />
+              {selectedActivity.images.length > 1 && (
+                <>
+                  <IconButton 
+                    sx={{ 
+                      position: 'absolute', 
+                      left: 8, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)',
+                      bgcolor: 'rgba(255,255,255,0.3)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.5)' }
+                    }}
+                    onClick={() => setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : selectedActivity.images.length - 1))}
+                  >
+                    <Typography variant="h4">‹</Typography>
+                  </IconButton>
+                  <IconButton 
+                    sx={{ 
+                      position: 'absolute', 
+                      right: 8, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)',
+                      bgcolor: 'rgba(255,255,255,0.3)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.5)' }
+                    }}
+                    onClick={() => setSelectedImageIndex((prev) => (prev < selectedActivity.images.length - 1 ? prev + 1 : 0))}
+                  >
+                    <Typography variant="h4">›</Typography>
+                  </IconButton>
+                </>
+              )}
+            </Box>
+            {selectedActivity.images.length > 1 && (
+              <Box sx={{ display: 'flex', overflowX: 'auto', p: 1, bgcolor: '#f5f5f5' }}>
+                {selectedActivity.images.map((image, index) => (
+                  <Box 
+                    key={index}
+                    sx={{ 
+                      width: 60, 
+                      height: 60, 
+                      flexShrink: 0,
+                      m: 0.5, 
+                      borderRadius: 1,
+                      border: index === selectedImageIndex ? `2px solid ${theme.palette.primary.main}` : 'none',
+                      overflow: 'hidden',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setSelectedImageIndex(index)}
+                  >
+                    <img 
+                      src={`http://localhost:4000/images/${image}`}
+                      alt={`Thumbnail ${index + 1}`}
+                      style={{ 
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }} 
+                    />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </>
+        )}
       </Dialog>
-
+      
       {/* Reassign Dialog */}
       <Dialog
         open={dialogOpen === 'reassign'}
