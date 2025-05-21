@@ -4,7 +4,7 @@ import pool from '../config/db.js';
 import validator from 'validator';
 
 const registerEngineer = async (req, res) => {
-  const { name, password, email, tel_num, specialization } = req.body;
+  const { name, password, email, tel_num, secretKey } = req.body;
   try {
     // Validation checks
     if (!validator.isEmail(email)) {
@@ -16,20 +16,20 @@ const registerEngineer = async (req, res) => {
     if (tel_num.length !== 10) {
       return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit phone number' });
     }
+    if (secretKey !== '5678') {
+      return res.status(400).json({ success: false, message: 'Invalid secret key' });
+    }
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Insert engineer into the database
+    const hashedPassword = await bcrypt.hash(password, salt);    // Insert engineer into the database
     const INSERT_ENGINEER_QUERY =
-      'INSERT INTO site_engineers (engineer_name, email, password, tel_num, specialization) VALUES (?, ?, ?, ?, ?)';
+      'INSERT INTO site_engineers (engineer_name, email, password, tel_num) VALUES (?, ?, ?, ?)';
     const [result] = await pool.query(INSERT_ENGINEER_QUERY, [
       name,
       email,
       hashedPassword,
-      tel_num,
-      specialization || null
+      tel_num
     ]);
 
     // Create token using the inserted ID (engineer_id)

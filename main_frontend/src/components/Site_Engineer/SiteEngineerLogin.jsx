@@ -6,13 +6,12 @@ import { useNavigate } from 'react-router-dom';
 
 const SiteEngineerAuth = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [registerData, setRegisterData] = useState({
+  const [loginData, setLoginData] = useState({ email: '', password: '' });  const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
     password: '',
     tel_num: '',
-    specialization: ''
+    secretKey: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,6 +66,12 @@ const SiteEngineerAuth = () => {
     // Validate phone number
     if (!registerData.tel_num || !registerData.tel_num.match(/^0\d{9}$/)) {
       setError('Phone number must be 10 digits and start with 0');
+      return;
+    }
+    
+    // Validate secret key
+    if (!registerData.secretKey || registerData.secretKey !== '5678') {
+      setError('Valid secret key is required');
       return;
     }
     
@@ -219,13 +224,14 @@ const SiteEngineerAuth = () => {
                 helperText={registerData.tel_num && !registerData.tel_num.match(/^0\d{9}$/) 
                   ? "Phone number must be 10 digits and start with 0" : ""}
                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-              />
-              <TextField
+              />              <TextField
                 margin="normal"
+                required
                 fullWidth
-                label="Specialization"
-                value={registerData.specialization}
-                onChange={(e) => setRegisterData({...registerData, specialization: e.target.value})}
+                label="Secret Key"
+                type="password"
+                value={registerData.secretKey}
+                onChange={(e) => setRegisterData({...registerData, secretKey: e.target.value})}
               />
               {error && (
                 <Typography color="error" variant="body2" sx={{ mt: 1 }}>
