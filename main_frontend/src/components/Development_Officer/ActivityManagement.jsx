@@ -523,8 +523,7 @@ const ActivityManagement = () => {
                     }}
                   >
                     Update Status
-                  </Button>
-                ) : activity.status === 'Rejected' ? (
+                  </Button>                ) : activity.status === 'Rejected' && activity.assignedEngineer ? (
                   <Button
                     variant="contained"
                     size="small"
