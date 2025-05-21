@@ -19,8 +19,7 @@ const ActivityList = () => {
   const [endDate, setEndDate] = useState('');
   
   const statusOptions = [
-    'Pending', 'Approved', 'Rejected', 'Not Started', 
-    'On-Going', 'Completed', 'Cancelled'
+    'Pending', 'Approved', 'Rejected'
   ];
 
   useEffect(() => {
