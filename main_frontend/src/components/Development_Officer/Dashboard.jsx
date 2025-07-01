@@ -1,30 +1,59 @@
+// Bootstrap CSS for responsive design
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+// React Bootstrap components for UI elements
 import { Alert, Badge, Button, Card, Col, Container, Form, InputGroup, ListGroup, ProgressBar, Row, Table } from 'react-bootstrap';
+
+// Recharts components for data visualization
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+// React core imports
 import React, { useEffect, useState } from 'react';
+
+// PDF generation libraries
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 
+// HTTP client for API requests
 import axios from 'axios';
 
+/**
+ * Dashboard Component for Development Officers
+ * 
+ * This comprehensive dashboard provides:
+ * - Budget allocation and management tools
+ * - Activity prioritization and selection
+ * - Data visualization with charts and graphs
+ * - Budget distribution analytics
+ * - Export functionality for reports
+ * - Real-time budget tracking and allocation status
+ */
 const Dashboard = () => {
+  // Budget management states
   const [budget, setBudget] = useState('');
   const [budgets, setBudgets] = useState([]);
+  
+  // Activity management states
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
   const [prioritizedActivities, setPrioritizedActivities] = useState([]); // All activities with assigned priorities
   const [filteredPriorityList, setFilteredPriorityList] = useState([]);
-  const [priorityListSearch, setPriorityListSearch] = useState('');
   const [selectedActivities, setSelectedActivities] = useState([]);
-  const [totalAllocated, setTotalAllocated] = useState(0);
+  
+  // Search and filter states
+  const [priorityListSearch, setPriorityListSearch] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
+  
+  // Budget calculation states
+  const [totalAllocated, setTotalAllocated] = useState(0);
+  
+  // Process management states
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [finalizeSuccess, setFinalizeSuccess] = useState(false);
   const [finalizeError, setFinalizeError] = useState(null);
 
-  // Custom color scheme
+  // Custom color scheme for consistent theming across charts and UI elements
   const colors = {
     primary: '#3498db',
     secondary: '#2ecc71',
@@ -34,7 +63,11 @@ const Dashboard = () => {
     chartColors: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c']
   };
 
-  // Format currency as LKR with commas
+  /**
+   * Formats monetary amounts in Sri Lankan Rupees with proper comma separation
+   * @param {number} amount - The amount to format
+   * @returns {string} Formatted currency string
+   */
   const formatCurrency = (amount) => {
     return `LKR ${Number(amount).toLocaleString('en-LK', {
       minimumFractionDigits: 2,
@@ -42,7 +75,7 @@ const Dashboard = () => {
     })}`;
   };
 
-  // Fetch budgets and activities
+  // Effect hook to fetch initial data when component mounts
   useEffect(() => {
     fetchBudgets();
     fetchActivities();

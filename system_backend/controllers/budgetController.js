@@ -1,10 +1,27 @@
+// Database connection pool
 import pool from '../config/db.js';
+// Email service for sending notifications
 import nodemailer from 'nodemailer';
 
-// Add new budget
+/**
+ * Budget Controller
+ * 
+ * Handles all budget-related operations including:
+ * - Adding new budgets
+ * - Retrieving budget information
+ * - Managing budget allocations
+ * - Sending budget reports via email
+ */
+
+/**
+ * Add new budget to the system
+ * @param {Object} req - Express request object containing budget amount
+ * @param {Object} res - Express response object
+ */
 export const addBudget = async (req, res) => {
   const { budget } = req.body;
 
+  // Validate budget input
   if (!budget || isNaN(budget)) {
     return res.status(400).json({
       success: false,
@@ -13,6 +30,7 @@ export const addBudget = async (req, res) => {
   }
 
   try {
+    // Insert new budget into database
     const [result] = await pool.query(
       'INSERT INTO budget (budget) VALUES (?)',
       [budget]
@@ -33,9 +51,14 @@ export const addBudget = async (req, res) => {
   }
 };
 
-// Get all budgets
+/**
+ * Retrieve all budgets from the database
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getAllBudgets = async (req, res) => {
   try {
+    // Fetch all budgets ordered by creation date (newest first)
     const [budgets] = await pool.query('SELECT * FROM budget ORDER BY created_at DESC');
     
     res.status(200).json({
