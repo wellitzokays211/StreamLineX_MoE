@@ -247,6 +247,7 @@ const AddActivity2 = ({ onBack }) => {
           status: 'Pending',
           assigned_engineer_id: ''
         });
+        
         // Clear image previews and files
         images.forEach(image => URL.revokeObjectURL(image.preview));
         setImages([]);

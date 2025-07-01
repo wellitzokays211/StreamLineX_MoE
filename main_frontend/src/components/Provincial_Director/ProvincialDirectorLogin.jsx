@@ -35,11 +35,11 @@ const SiteAuth = () => {
         }));
         navigate('/final');
       } else {
-        setError(response.data.message || 'Invalid username or password');
+        setError('Invalid login');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('Server error. Please try again later.');
+      setError('Invalid login');
     } finally {
       setLoading(false);
     }

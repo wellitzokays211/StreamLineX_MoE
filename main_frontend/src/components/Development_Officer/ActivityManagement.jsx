@@ -1,3 +1,4 @@
+// Material-UI component imports for building the user interface
 import {
   Avatar,
   Box,
@@ -25,12 +26,16 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
+// Material-UI icon imports for visual indicators
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+
+// React core imports and date utility
 import React, { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 
+// Additional Material-UI icons for various status indicators and categories
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -42,9 +47,15 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+
+// HTTP client for API requests
 import axios from 'axios';
 import './ActivityManagement.css';
 
+/**
+ * Component data structure defining education system components and their subcomponents
+ * This data is used for categorizing activities within the education management system
+ */
 const componentData = {
   "Strengthen Equity in Education: Equitable Learning Opportunities for All Children": [
     "Implementation of 13 years mandatory education policy",
@@ -74,14 +85,35 @@ const componentData = {
   ],
 };
 
+/**
+ * ActivityManagement Component
+ * 
+ * Main component for managing educational activities by Development Officers.
+ * Features include:
+ * - Viewing all activities in a card-based layout
+ * - Filtering activities by status
+ * - Updating activity status (approve/reject)
+ * - Assigning engineers to approved activities
+ * - Viewing activity images in a modal
+ * - Reassigning rejected activities to different engineers
+ */
 const ActivityManagement = () => {
   const theme = useTheme();
+  
+  // State management for activities and engineers data
   const [activities, setActivities] = useState([]);
   const [engineers, setEngineers] = useState([]);
+  
+  // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Form states for activity updates
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedEngineer, setSelectedEngineer] = useState('');  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [selectedEngineer, setSelectedEngineer] = useState('');
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  
+  // Dialog and UI states
   const [dialogOpen, setDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
@@ -89,9 +121,12 @@ const ActivityManagement = () => {
   const [selectedSubcomponent, setSelectedSubcomponent] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
+  // Configuration arrays for dropdowns and filters
   const statusOptions = ['DO Accepted', 'Rejected'];
   const filterOptions = ['All', 'Pending', 'Approved', 'Rejected', 'PDApproved'];
 
+  // Color mapping for different activity statuses
   const statusColors = {
     Pending: 'warning',
     Approved: 'success',
@@ -102,6 +137,7 @@ const ActivityManagement = () => {
     Accepted: 'success'
   };
 
+  // Icon mapping for different activity statuses
   const statusIcons = {
     Pending: <AccessTimeIcon fontSize="small" />,
     Approved: <CheckCircleIcon fontSize="small" />,
@@ -112,24 +148,33 @@ const ActivityManagement = () => {
     Accepted: <CheckCircleIcon fontSize="small" />
   };
 
+  // Color mapping for priority levels (currently unused but available for future use)
   const priorityColors = {
     High: 'error',
     Medium: 'warning',
     Low: 'success'
   };
 
+  // Effect hook to fetch initial data when component mounts
   useEffect(() => {
     fetchData();
   }, []);
 
+  /**
+   * Fetches activities and engineers data from the backend API
+   * Sets loading states and handles errors appropriately
+   */
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // Fetch both activities and engineers data simultaneously
       const [activitiesRes, engineersRes] = await Promise.all([
         axios.get('http://localhost:4000/api/activity/get'),
         axios.get('http://localhost:4000/api/engineers')
       ]);
 
+      // Check if both API calls were successful
       if (activitiesRes.data.success && engineersRes.data.success) {
         setActivities(activitiesRes.data.activities);
         setEngineers(engineersRes.data.engineers);
@@ -137,12 +182,17 @@ const ActivityManagement = () => {
         setError('Failed to fetch data');
       }
     } catch (err) {
+      // Handle any network or server errors
       setError(err.response?.data?.message || 'Error fetching data');
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * Opens the status update dialog and initializes form data
+   * @param {Object} activity - The activity object to be updated
+   */
   const handleStatusChange = (activity) => {
     setSelectedActivity(activity);
     setSelectedStatus('');
@@ -153,6 +203,10 @@ const ActivityManagement = () => {
     setEditedDescription(activity.description || '');
     setDialogOpen(true);
   };
+  
+  /**
+   * Closes the dialog and resets all form states
+   */
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedActivity(null);
@@ -165,13 +219,18 @@ const ActivityManagement = () => {
     setSelectedImageIndex(0);
   };
 
+ /**
+  * Handles the status update process for an activity
+  * Converts frontend status to backend status and sends update request
+  */
  const handleStatusUpdate = async () => {
   if (!selectedActivity || !selectedStatus) return;
 
   try {
-    // Convert 'DO Accepted' to 'Approved' for the backend
+    // Convert 'DO Accepted' to 'Approved' for the backend API
     const statusForBackend = selectedStatus === 'DO Accepted' ? 'Approved' : selectedStatus;
     
+    // Prepare the payload for the API request
     const payload = {
       id: selectedActivity.id,
       status: statusForBackend,
@@ -185,18 +244,29 @@ const ActivityManagement = () => {
     const response = await axios.put('http://localhost:4000/api/activity/update', payload);
 
     if (response.data.success) {
-      fetchData();
-      handleDialogClose();
+      fetchData(); // Refresh the activities list
+      handleDialogClose(); // Close the dialog
     }
   } catch (err) {
     setError(err.response?.data?.message || 'Update failed');
   }
 };
 
+  /**
+   * Formats engineer information for display
+   * @param {Object} engineer - Engineer object with name and specialization
+   * @returns {string} Formatted engineer name with specialization
+   */
   const getEngineerName = (engineer) => {
     if (!engineer) return 'Not assigned';
     return `${engineer.name} (${engineer.specialization})`;
   };
+  
+  /**
+   * Returns appropriate status message based on activity status
+   * @param {string} status - Current activity status
+   * @returns {string} User-friendly status message
+   */
   const getStatusMessage = (status) => {
     switch(status) {
       case 'Approved':
@@ -217,31 +287,54 @@ const ActivityManagement = () => {
     }
   };
 
+  /**
+   * Handles component selection and resets subcomponent
+   * @param {string} value - Selected component value
+   */
   const handleComponentChange = (value) => {
     setSelectedComponent(value);
-    setSelectedSubcomponent('');
+    setSelectedSubcomponent(''); // Reset subcomponent when component changes
   };
 
+  /**
+   * Returns available subcomponents for the selected component
+   * @returns {Array} Array of subcomponent strings
+   */
   const getAvailableSubcomponents = () => {
     if (!selectedComponent) return [];
     return componentData[selectedComponent] || [];
   };
 
+  /**
+   * Filters activities based on selected filter status
+   * @returns {Array} Filtered activities array
+   */
   const getFilteredActivities = () => {
     if (!filterStatus || filterStatus === 'All') return activities;
     return activities.filter(activity => activity.status === filterStatus);
   };
 
+  /**
+   * Generates initials from engineer name for avatar display
+   * @param {Object} engineer - Engineer object with name property
+   * @returns {string} Uppercase initials
+   */
   const getInitials = (engineer) => {
     if (!engineer || !engineer.name) return 'NA';
     return engineer.name.split(' ').map(word => word[0]).join('').toUpperCase();
   };
 
+  /**
+   * Gets the appropriate border color for activity cards based on status
+   * @param {string} status - Activity status
+   * @returns {string} Color value from theme
+   */
   const getCardBorderColor = (status) => {
     const statusColor = statusColors[status] || 'default';
     return theme.palette[statusColor]?.main || theme.palette.grey[300];
   };
 
+  // Loading state - show spinner while data is being fetched
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -250,6 +343,7 @@ const ActivityManagement = () => {
     );
   }
 
+  // Error state - show error message with retry option
   if (error) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -267,8 +361,10 @@ const ActivityManagement = () => {
     );
   }
 
+  // Main component render
   return (
     <div className="activity-management-container">
+      {/* Header section with title and filter controls */}
       <div className="activity-management-header">
         <h1>Activity List</h1>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -290,9 +386,12 @@ const ActivityManagement = () => {
           </FormControl>
         </div>
       </div>
+      
+      {/* Activities grid layout */}
       <Grid container spacing={3}>
         {getFilteredActivities().map((activity) => (
           <Grid item xs={12} sm={6} md={4} key={activity.id}>
+            {/* Individual activity card */}
             <Card className="activity-card"
               sx={{
                 height: '100%',
@@ -307,6 +406,7 @@ const ActivityManagement = () => {
                 }
               }}
             >
+              {/* Card header with avatar and basic activity info */}
               <CardHeader
                 avatar={
                   <Avatar 
@@ -332,7 +432,10 @@ const ActivityManagement = () => {
                   />
                 }
               />
+              
+              {/* Card content with activity details */}
                 <CardContent sx={{ pt: 0, flexGrow: 1 }}>
+                {/* Activity description */}
                 <Typography 
                   variant="body1" 
                   sx={{ 
@@ -352,7 +455,7 @@ const ActivityManagement = () => {
                   {activity.description}
                 </Typography>
                 
-                {/* Display image if available */}
+                {/* Activity image display - shows first image with indicator for multiple images */}
                 {activity.images && activity.images.length > 0 && (
                   <Box 
                     sx={{ 
@@ -378,6 +481,7 @@ const ActivityManagement = () => {
                         setDialogOpen('image');
                       }}
                     />
+                    {/* Multiple images indicator */}
                     {activity.images.length > 1 && (
                       <Box
                         sx={{
@@ -399,6 +503,9 @@ const ActivityManagement = () => {
                 
                 <Divider sx={{ my: 1.5 }} />
                 
+                {/* Activity metadata section */}
+                
+                {/* Component information */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <CategoryIcon 
                     fontSize="small" 
@@ -415,6 +522,7 @@ const ActivityManagement = () => {
                   </Typography>
                 </Box>
                 
+                {/* Subcomponent information */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <ClassIcon 
                     fontSize="small" 
@@ -431,6 +539,7 @@ const ActivityManagement = () => {
                   </Typography>
                 </Box>
                 
+                {/* Location information */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <LocationOnIcon 
                     fontSize="small" 
@@ -447,6 +556,7 @@ const ActivityManagement = () => {
                   </Typography>
                 </Box>
                 
+                {/* Assigned engineer information */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <EngineeringIcon 
                     fontSize="small" 
@@ -463,6 +573,7 @@ const ActivityManagement = () => {
                   </Typography>
                 </Box>
                 
+                {/* Creation timestamp */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <AccessTimeIcon 
                     fontSize="small" 
@@ -479,6 +590,7 @@ const ActivityManagement = () => {
                   </Typography>
                 </Box>
                 
+                {/* Rejection reason display (only shown if activity was rejected) */}
                 {activity.rejection_reason && (
                   <Box 
                     sx={{ 
@@ -502,6 +614,7 @@ const ActivityManagement = () => {
                 )}
               </CardContent>
               
+              {/* Card actions - different buttons based on activity status */}
               <CardActions 
                 sx={{ 
                   justifyContent: 'flex-end', 
@@ -510,6 +623,7 @@ const ActivityManagement = () => {
                   borderTop: `1px solid ${theme.palette.divider}`
                 }}
               >
+                {/* Show update button for pending activities */}
                 {activity.status === 'Pending' ? (
                   <Button
                     variant="contained"
@@ -525,7 +639,8 @@ const ActivityManagement = () => {
                     }}
                   >
                     Update Status
-                  </Button>                ) : activity.status === 'Rejected' && activity.assignedEngineer ? (
+                  </Button>
+                ) : activity.status === 'Rejected' && activity.assignedEngineer ? (
                   <Button
                     variant="contained"
                     size="small"
@@ -553,7 +668,7 @@ const ActivityManagement = () => {
         ))}
       </Grid>
 
-      {/* Status Update Dialog */}
+      {/* Status Update Dialog - Main dialog for updating activity status, assigning engineers, etc. */}
       <Dialog 
         open={dialogOpen === true} 
         onClose={handleDialogClose} 
@@ -570,6 +685,7 @@ const ActivityManagement = () => {
           </Typography>
         </DialogTitle>
         <DialogContent dividers>
+          {/* Activity description field */}
           <TextField
             fullWidth
             margin="normal"
@@ -581,6 +697,8 @@ const ActivityManagement = () => {
             required
             InputProps={{ sx: { borderRadius: 1 } }}
           />
+          
+          {/* Status selection dropdown */}
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
             <Select
@@ -603,6 +721,7 @@ const ActivityManagement = () => {
 
           
 
+          {/* Component selection dropdown */}
           <FormControl fullWidth margin="normal">
             <InputLabel>Component</InputLabel>
             <Select
@@ -619,6 +738,7 @@ const ActivityManagement = () => {
             </Select>
           </FormControl>
 
+          {/* Subcomponent selection dropdown - depends on selected component */}
           <FormControl fullWidth margin="normal">
             <InputLabel>Subcomponent</InputLabel>
             <Select
@@ -636,6 +756,7 @@ const ActivityManagement = () => {
             </Select>
           </FormControl>
 
+          {/* Engineer assignment dropdown - only shown when status is 'Approved' */}
           {selectedStatus === 'Approved' && (
             <FormControl fullWidth margin="normal">
               <InputLabel>Assign Engineer</InputLabel>
@@ -663,11 +784,11 @@ const ActivityManagement = () => {
                       {engineer.engineer_name} ({engineer.specialization})
                     </Box>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                ))}            </Select>
+          </FormControl>
           )}
 
+          {/* Rejection reason field - only shown when status is 'Rejected' */}
           {selectedStatus === 'Rejected' && (
             <TextField
               fullWidth
@@ -687,6 +808,7 @@ const ActivityManagement = () => {
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: theme.palette.grey[50] }}>
+          {/* Cancel button */}
           <Button 
             onClick={handleDialogClose}
             variant="outlined"
@@ -694,7 +816,9 @@ const ActivityManagement = () => {
             sx={{ borderRadius: 4 }}
           >
             Cancel
-          </Button>          <Button 
+          </Button>
+          {/* Update button - disabled if required fields are missing */}
+          <Button 
             onClick={handleStatusUpdate} 
             color="primary" 
             variant="contained"
@@ -711,7 +835,9 @@ const ActivityManagement = () => {
             Update Status
           </Button>
         </DialogActions>
-      </Dialog>      {/* Image Dialog */}
+      </Dialog>
+      
+      {/* Image Gallery Dialog - Shows activity images in a modal with navigation */}
       <Dialog
         open={dialogOpen === 'image'}
         onClose={handleDialogClose}
@@ -720,6 +846,7 @@ const ActivityManagement = () => {
       >
         {selectedActivity && selectedActivity.images && selectedActivity.images.length > 0 && (
           <>
+            {/* Dialog header with image counter */}
             <DialogTitle sx={{ bgcolor: theme.palette.primary.main, color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6">
                 Activity #{selectedActivity.id} Images ({selectedImageIndex + 1}/{selectedActivity.images.length})
@@ -728,6 +855,8 @@ const ActivityManagement = () => {
                 <CancelIcon />
               </IconButton>
             </DialogTitle>
+            
+            {/* Main image display area with navigation arrows */}
             <Box sx={{ position: 'relative', width: '100%', maxHeight: '70vh', display: 'flex', justifyContent: 'center', bgcolor: '#000' }}>
               <img 
                 src={`http://localhost:4000/images/${selectedActivity.images[selectedImageIndex]}`}
@@ -738,8 +867,10 @@ const ActivityManagement = () => {
                   objectFit: 'contain'
                 }} 
               />
+              {/* Navigation arrows for multiple images */}
               {selectedActivity.images.length > 1 && (
                 <>
+                  {/* Previous image button */}
                   <IconButton 
                     sx={{ 
                       position: 'absolute', 
@@ -753,6 +884,7 @@ const ActivityManagement = () => {
                   >
                     <Typography variant="h4">‹</Typography>
                   </IconButton>
+                  {/* Next image button */}
                   <IconButton 
                     sx={{ 
                       position: 'absolute', 
@@ -769,6 +901,7 @@ const ActivityManagement = () => {
                 </>
               )}
             </Box>
+            {/* Image thumbnails row for multiple images */}
             {selectedActivity.images.length > 1 && (
               <Box sx={{ display: 'flex', overflowX: 'auto', p: 1, bgcolor: '#f5f5f5' }}>
                 {selectedActivity.images.map((image, index) => (
@@ -803,7 +936,7 @@ const ActivityManagement = () => {
         )}
       </Dialog>
       
-      {/* Reassign Dialog */}
+      {/* Engineer Reassignment Dialog - Used for reassigning rejected activities */}
       <Dialog
         open={dialogOpen === 'reassign'}
         onClose={handleDialogClose}
@@ -817,6 +950,7 @@ const ActivityManagement = () => {
           </Typography>
         </DialogTitle>
         <DialogContent dividers>
+          {/* Engineer selection for reassignment */}
           <FormControl fullWidth margin="normal">
             <InputLabel>Assign Engineer</InputLabel>
             <Select
@@ -848,6 +982,7 @@ const ActivityManagement = () => {
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: theme.palette.grey[50] }}>
+          {/* Cancel reassignment */}
           <Button 
             onClick={handleDialogClose}
             variant="outlined"
@@ -856,6 +991,7 @@ const ActivityManagement = () => {
           >
             Cancel
           </Button>
+          {/* Confirm reassignment */}
           <Button 
             onClick={async () => {
               if (!selectedActivity || !selectedEngineer) return;

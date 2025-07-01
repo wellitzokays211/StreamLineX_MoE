@@ -38,10 +38,10 @@ const SiteEngineerAuth = () => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         navigate('/list-e');
       } else {
-        setError(response.data.message || 'Login failed');
+        setError('Invalid login');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during login');
+      setError('Invalid login');
       console.error('Login error:', err);
     } finally {
       setLoading(false);

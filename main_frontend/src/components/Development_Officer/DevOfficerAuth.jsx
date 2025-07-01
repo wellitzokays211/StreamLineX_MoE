@@ -110,9 +110,11 @@ const DevOfficerAuth = () => {
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         navigate('/priority-list'); 
+      } else {
+        setApiError('Invalid login');
       }
     } catch (error) {
-      setApiError(error.response?.data?.message || 'Login failed');
+      setApiError('Invalid login');
     }
   };
 

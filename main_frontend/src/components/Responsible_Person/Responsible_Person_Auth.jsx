@@ -31,11 +31,14 @@ const Responsible_Person_Auth = () => {
         body: JSON.stringify(loginData)
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Authentication failed');
+      if (!response.ok) {
+        setError('Invalid login');
+        return;
+      }
       localStorage.setItem('token', data.token);
       navigate('/List-Activity');
     } catch (err) {
-      setError(err.message);
+      setError('Invalid login');
     } finally {
       setLoading(false);
     }
